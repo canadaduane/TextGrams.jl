@@ -38,30 +38,20 @@ end
 
 function bench_ngramize()
   @printf("%35s\n", "bench_ngramize")
-  open(fixture("bom.txt")) do f
-    text = readall(f)
-    time_and_print("ngramize", 3, ngramize, text, 4)
+  with_fixtures("bom.txt") do bom
+    time_and_print("ngramize", 3, ngramize, bom, 4)
   end
 end
 
 function bench_text_clean()
   @printf("%35s\n", "bench_text_clean")
-  open(fixture("bom.txt")) do f
-    text = readall(f)
-    time_and_print("clean!", 1, clean!, MutableASCIIString(text))
+  with_fixtures("bom.txt") do bom
+    time_and_print("clean!", 1, clean!, MutableASCIIString(bom))
   end
 end
 
 function test_ngram_union_add()
   @printf("%35s\n", "test_ngram_union_add")
-  d1 = ngramize("test test words", 1)
-  d2 = ngramize("test some words", 1)
-  union_add!(d1, d2)
-  @assert(d1 == ["test" => 3, "words" => 2, "some" => 1], "got $d1")
-end
-
-function bench_ngram_union_add()
-  @printf("%35s\n", "bench_ngram_union_add")
   d1 = ngramize("test test words", 1)
   d2 = ngramize("test some words", 1)
   union_add!(d1, d2)
@@ -76,15 +66,41 @@ function test_ngram_intersect_add()
   @assert(d1 == ["test" => 3, "words" => 2], "got $d1")
 end
 
+function test_ngram_subtract_del()
+  @printf("%35s\n", "test_ngram_subtract_del")
+  d1 = ngramize("test some words", 1)
+  d2 = ngramize("test test words", 1)
+  subtract_del!(d1, d2)
+  @assert(d1 == ["some" => 1], "got $d1")
+end
+
+function bench_ngram_add(type_name, fn, n=3)
+  @printf("%35s\n", "bench_ngram_$(type_name)_add 1-to-$(n)-grams")
+  with_fixtures("bom.txt", "tlw.txt") do bom, tlw
+    m_bom = MutableASCIIString(bom)
+    m_tlw = MutableASCIIString(tlw)
+    clean!(m_bom)
+    clean!(m_tlw)
+    bom_dict = ngramize(m_bom, n)
+    tlw_dict = ngramize(m_tlw, n)
+    time_and_print("$(type_name)_add!", 1, fn, bom_dict, tlw_dict)
+  end
+end
+
+
 test_ngram_one_word()
 test_ngram_three_words()
 test_ngram_three_words_unigram()
 test_ngram_paragraph()
 test_ngram_union_add()
 test_ngram_intersect_add()
+test_ngram_subtract_del()
 
 bench_ngramize()
 bench_text_clean()
-bench_ngram_union_add()
+bench_ngram_add("union", union_add!, 3)
+bench_ngram_add("union", union_add!, 4)
+bench_ngram_add("intersect", intersect_add!, 3)
+bench_ngram_add("intersect", intersect_add!, 4)
 
 end

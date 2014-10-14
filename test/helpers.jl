@@ -14,3 +14,13 @@ end
 function fixture(file)
   joinpath(dirname(@__FILE__()), file)
 end
+
+function with_fixtures(fn::Function, files...)
+  file_contents = String[]
+  for f in files
+    open(fixture(f)) do fh
+      push!(file_contents, readall(fh))
+    end
+  end
+  fn(file_contents...)
+end

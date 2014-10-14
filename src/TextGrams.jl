@@ -1,7 +1,7 @@
 module TextGrams
 
 export ngramize
-export union_add!, intersect_add!
+export union_add!, intersect_add!, subtract_del!
 export clean!
 
 
