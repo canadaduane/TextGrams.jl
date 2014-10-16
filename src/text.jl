@@ -81,3 +81,7 @@ function clean!(text::MutableASCIIString)
 
   return text
 end
+
+function clean(text)
+  clean!(MutableASCIIString(copy(text)))
+end
