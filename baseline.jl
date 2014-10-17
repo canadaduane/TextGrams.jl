@@ -16,6 +16,11 @@ function parse_commandline()
         "--no-output"
             help = "don't show key/value result"
             action = :store_true
+        "--ngrams", "-n"
+            help = "the N in ngrams (e.g. '3' to create up to 3-grams)"
+            nargs = 1
+            arg_type = Integer
+            default = Integer[3]
         "FILES"
             help = "files or directories to show"
             required = true
@@ -105,7 +110,7 @@ end
 
 msg("Loading precedent doc $(precedent_path)...")
 # Load once
-precedent_data, t, m = @timed remotecall_fetch(1, ngram_data, precedent_path)
+precedent_data, t, m = @timed remotecall_fetch(1, ngram_data, precedent_path, first(settings["ngrams"]))
 m_mb = integer(m/1024/1024)
 msg("time: $(t), memory: $(m_mb) MB, keys: $(length(precedent_data.ngrams))")
 
@@ -119,14 +124,14 @@ maybe_timed("Distribute precedent doc...") do
   end
 end
 
-maybe_timed("Extracting ngrams (map)...") do
+maybe_timed("Extracting $(first(settings["ngrams"]))-grams (map)...") do
   files = settings["FILES"]
   peach(@task(file_producer(files)), ref_list, settings) do file, ref_list, settings
     if settings["verbose"]
       @printf("%45s processing...\n", basename(file))
     end
     local precedent_data = fetch(ref_list[myid()])
-    new_data = ngram_data(file)
+    new_data = ngram_data(file, first(settings["ngrams"]))
     intersect_add!(precedent_data.ngrams, new_data.ngrams)
     if settings["verbose"]
       @printf("%45s Done: added %s ngrams\n", basename(file), length(new_data.ngrams))
@@ -144,7 +149,7 @@ maybe_timed("Combining ngrams (reduce)...") do
 end
 
 maybe_timed("Removing duplicate counts...") do
-  nw = nworkers()
+  nw = nworkers()-1 # minus one here because we want *one* copy of the counts to remain
   for (k,v) in precedent_data.ngrams
     fv = final_ngrams[k]
     if fv >= v*nw
