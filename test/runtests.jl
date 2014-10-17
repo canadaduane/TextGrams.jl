@@ -84,11 +84,11 @@ function test_ngram_intersect_add()
   @assert(d1 == ["test" => 3, "words" => 2], "got $d1")
 end
 
-function test_ngram_subtract_del()
+function test_ngram_delete()
   @printf("%35s\n", "test_ngram_subtract_del")
   d1 = ngramize("test some words", 1)
   d2 = ngramize("test test words", 1)
-  subtract_del!(d1, d2)
+  delete!(d1, d2)
   @assert(d1 == ["some" => 1], "got $d1")
 end
 
@@ -107,21 +107,21 @@ end
 
 function bench_ngramize()
   @printf("%35s\n", "bench_ngramize")
-  with_fixtures("bom.txt") do bom
+  with_fixtures(joinpath("samples", "bom.txt")) do bom
     time_and_print("ngramize", 3, ngramize, bom, 4)
   end
 end
 
 function bench_text_clean()
   @printf("%35s\n", "bench_text_clean")
-  with_fixtures("bom.txt") do bom
+  with_fixtures(joinpath("samples", "bom.txt")) do bom
     time_and_print("clean", 1, clean, MutableASCIIString(bom))
   end
 end
 
 function bench_ngram_add(type_name, fn, n=3)
   @printf("%35s\n", "bench_ngram_$(type_name)_add 1-to-$(n)-grams")
-  with_fixtures("bom.txt", "tlw.txt") do bom, tlw
+  with_fixtures(joinpath("samples", "bom.txt"), joinpath("samples", "tlw.txt")) do bom, tlw
     m_bom = MutableASCIIString(bom)
     m_tlw = MutableASCIIString(tlw)
     clean!(m_bom)
@@ -140,7 +140,7 @@ test_ngram_three_words_unigram()
 test_ngram_paragraph()
 test_ngram_union_add()
 test_ngram_intersect_add()
-test_ngram_subtract_del()
+test_ngram_delete()
 
 bench_ngramize()
 bench_text_clean()

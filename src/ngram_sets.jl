@@ -55,12 +55,12 @@ end
 function delete!{K,V}(d::Associative{K,V}, others::Associative{K,V}...)
   for other in others
     for (k, v) in other
-      delete!(d, k)
+      Base.delete!(d, k)
     end
   end
   return d
 end
 
 function delete{K,V}(d::Associative{K,V}, others::Associative{K,V}...)
-  subtract_del!(copy(d), others...)
+  delete!(copy(d), others...)
 end
