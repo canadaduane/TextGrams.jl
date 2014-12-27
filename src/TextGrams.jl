@@ -1,7 +1,7 @@
 module TextGrams
 
 include("clean.jl")
-include("file.jl")
+include("FileUtils.jl")
 
 include("Document.jl")
 include("Ngrams.jl")

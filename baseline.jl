@@ -96,7 +96,7 @@ end
 
 maybe_timed("Extracting $(first(settings["ngrams"]))-grams (map)...") do
   files = settings["FILES"]
-  peach(@task(file_producer(files)), ref_list, settings) do file, ref_list, settings
+  peach(@task(fileProducer(files)), ref_list, settings) do file, ref_list, settings
     if settings["verbose"]
       @printf("%45s processing...\n", basename(file))
     end
