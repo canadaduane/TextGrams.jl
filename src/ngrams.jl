@@ -1,19 +1,37 @@
-function _ngramize_incr(dict, text, head, tail)
-  key = text[head:tail]
-  counter = get!(dict, key, 0)
-  dict[key] = counter + 1
-end
+using TextGrams.Document
 
-function ngramize(text::String, n::Integer)
-  if n == 1
-    _ngramize_unigrams(text)
-  else
-    _ngramize_ngrams(text, n)
+export Ngrams, copy
+
+# Public types and functions
+
+typealias Ngrams Dict{ASCIIString,Integer}
+
+function Ngrams(arr::Array{Any,2})
+  d = Ngrams()
+  for i in 1:size(arr, 1)
+    d[convert(ASCIIString, arr[i,1])] = arr[i,2]
   end
+  return d
 end
 
-function _ngramize_ngrams(text::String, n::Integer)
-  d = Dict{typeof(text), Integer}()
+function Ngrams(file::IOStream)
+  arr = readdlm(file, '\t')
+  close(file)
+  Ngrams(arr)
+end
+
+function Ngrams(d::Document, n::Integer = 1)
+  ngramizeNgrams(d.content, n)
+end
+
+function Ngrams(text::String, n::Integer = 1)
+  ngramizeNgrams(text, n)
+end
+
+# Private functions
+
+function ngramizeNgrams(text::String, n::Integer)
+  d = Ngrams()
 
   head = next_head = 1
   while head < length(text)
@@ -22,7 +40,7 @@ function _ngramize_ngrams(text::String, n::Integer)
     while tail < length(text)
       if text[tail] == ' ' || text[tail] == '.'
         separators += 1
-        _ngramize_incr(d, text, head, tail-1)
+        incrementedSubstring(d, text, head, tail-1)
         if separators == 1
           next_head = tail + 1
         end
@@ -33,7 +51,7 @@ function _ngramize_ngrams(text::String, n::Integer)
       tail += 1
     end
     if tail == length(text)
-      _ngramize_incr(d, text, head, tail)
+      incrementedSubstring(d, text, head, tail)
       if separators == 0
         break
       end
@@ -44,7 +62,8 @@ function _ngramize_ngrams(text::String, n::Integer)
   return d
 end
 
-function _ngramize_unigrams(text::String)
-  # TODO: Optimize this
-  _ngramize_ngrams(text, 1)
+function incrementedSubstring(dict, text, head, tail)
+  key = text[head:tail]
+  counter = get!(dict, key, 0)
+  dict[key] = counter + 1
 end

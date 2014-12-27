@@ -1,3 +1,5 @@
+export each_file, file_producer
+
 function each_file(fn::Function, path)
   if isdir(path)
     for file_or_dir in readdir(path)

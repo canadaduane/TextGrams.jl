@@ -62,36 +62,6 @@ end
 
 @everywhere using TextGrams
 @everywhere using MutableStrings
-@everywhere import Base.copy
-
-@everywhere begin
-  type NgramData
-    content::MutableASCIIString
-    title::String
-    ngrams::Dict{ASCIIString,Integer}
-  end
-
-  function ngram_data(path, n = 3)
-    content = MutableASCIIString(ioread(path))
-    short = length(content) > 35 ? content[1:35] : content
-    clean!(content)
-    ngrams = ngramize(content, n)
-    NgramData(content, replace(short, r"\s+", " "), ngrams)
-  end
-
-  function copy(data::NgramData)
-    NgramData(data.content, copy(data.title), copy(data.ngrams))
-  end
-
-  function ioread(file)
-    content = ""
-    open(file) do fh
-      content = readall(fh)
-    end
-    return content
-  end
-
-end
 
 function peach(fn::Function, producer::Task, args...)
   np = nprocs()
@@ -110,9 +80,9 @@ end
 
 msg("Loading precedent doc $(precedent_path)...")
 # Load once
-precedent_data, t, m = @timed remotecall_fetch(1, ngram_data, precedent_path, first(settings["ngrams"]))
+precedent_ngrams, t, m = @timed remotecall_fetch(1, ngramsOfTextFile, precedent_path, None, first(settings["ngrams"]))
 m_mb = integer(m/1024/1024)
-msg("time: $(t), memory: $(m_mb) MB, keys: $(length(precedent_data.ngrams))")
+msg("time: $(t), memory: $(m_mb) MB, keys: $(length(precedent_ngrams))")
 
 maybe_timed("Distribute precedent doc...") do
   # Distribute everywhere
@@ -120,7 +90,7 @@ maybe_timed("Distribute precedent doc...") do
     msg("  Sending $(m_mb) MB to $(p-1)/$(nworkers()) workers")
     rr = RemoteRef(p)
     ref_list[p] = rr
-    put!(rr, precedent_data)
+    put!(rr, precedent_ngrams)
   end
 end
 
@@ -130,27 +100,27 @@ maybe_timed("Extracting $(first(settings["ngrams"]))-grams (map)...") do
     if settings["verbose"]
       @printf("%45s processing...\n", basename(file))
     end
-    local precedent_data = fetch(ref_list[myid()])
-    new_data = ngram_data(file, first(settings["ngrams"]))
-    intersect_add!(precedent_data.ngrams, new_data.ngrams)
+    local precedent_ngrams = fetch(ref_list[myid()])
+    ngrams = Ngrams(file, first(settings["ngrams"]))
+    intersectAdd!(precedent_ngrams, ngrams)
     if settings["verbose"]
-      @printf("%45s Done: added %s ngrams\n", basename(file), length(new_data.ngrams))
+      @printf("%45s Done: added %s ngrams\n", basename(file), length(ngrams))
     end
   end
 end
 
-final_ngrams = Dict{ASCIIString,Integer}()
+final_ngrams = Ngrams()
 maybe_timed("Combining ngrams (reduce)...") do
   for (k,v) in ref_list
-    data = fetch(v)
-    msg("$k -> $(length(data.ngrams))")
-    union_add!(final_ngrams, data.ngrams)
+    ngrams = fetch(v)
+    msg("$k -> $(length(ngrams))")
+    unionAdd!(final_ngrams, ngrams)
   end
 end
 
 maybe_timed("Removing duplicate counts...") do
   nw = nworkers()-1 # minus one here because we want *one* copy of the counts to remain
-  for (k,v) in precedent_data.ngrams
+  for (k,v) in precedent_ngrams
     fv = final_ngrams[k]
     if fv >= v*nw
       final_ngrams[k] = fv - v*nw

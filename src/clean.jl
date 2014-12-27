@@ -1,5 +1,7 @@
 using MutableStrings
 
+export clean!, clean
+
 #=
  Transforms text such as the following:
 

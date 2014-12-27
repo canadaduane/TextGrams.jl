@@ -1,15 +1,15 @@
 module TextGrams
 
-export ngramize
-export union_add,  union_sub,  intersect_add,  delete
-export union_add!, union_sub!, intersect_add!, delete!
-export clean
-export clean!
-export each_file, file_producer
-
-include("ngrams.jl")
-include("ngram_sets.jl")
-include("text.jl")
+include("clean.jl")
 include("file.jl")
+
+include("Document.jl")
+include("Ngrams.jl")
+include("NgramsSets.jl")
+
+export ngramsOfTextFile
+function ngramsOfTextFile(filename, title = None, n::Integer = 1)
+  Ngrams(Document(open(filename), title), n)
+end
 
 end
