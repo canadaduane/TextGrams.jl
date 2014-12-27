@@ -34,7 +34,7 @@ settings = parse_commandline()
 
 function msg(m...)
   if settings["verbose"]
-    println(m...)
+    println(STDERR, m...)
   end
 end
 
