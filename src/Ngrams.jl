@@ -29,7 +29,11 @@ function Ngrams(file::IOStream, callback::Function)
   d = Ngrams()
   for line::ASCIIString in eachline(file)
     tab = search(line, '\t')
-    d[line[1:(tab-1)]] = int(line[(tab+1):end-1])
+    try
+      d[line[1:(tab-1)]] = int(line[(tab+1):end-1])
+    catch
+      d[line[1:(tab-1)]] = int(line[(tab+1):end])
+    end
     callback(length(line))
   end
   d
