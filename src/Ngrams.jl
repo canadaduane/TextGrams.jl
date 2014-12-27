@@ -9,7 +9,12 @@ typealias Ngrams Dict{ASCIIString,Integer}
 function Ngrams(arr::Array{Any,2})
   d = Ngrams()
   for i in 1:size(arr, 1)
-    d[convert(ASCIIString, arr[i,1])] = arr[i,2]
+    try
+      d[convert(ASCIIString, arr[i,1])] = arr[i,2]
+    catch e
+      println(STDERR, "'$(arr[i,1])' ($(typeof(arr[i,1]))) $(arr[i,2]) ($(typeof(arr[i,2])))")
+      rethrow(e)
+    end
   end
   return d
 end
