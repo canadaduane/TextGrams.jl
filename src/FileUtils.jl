@@ -6,7 +6,7 @@ function eachFile(fn::Function, path)
       if !beginswith(file_or_dir, ".")
         fullpath = joinpath(path, file_or_dir)
         if isdir(fullpath)
-          each_file(fn, fullpath)
+          eachFile(fn, fullpath)
         else
           fn(fullpath)
         end

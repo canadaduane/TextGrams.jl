@@ -20,7 +20,7 @@ function parse_commandline()
             help = "the N in ngrams (e.g. '3' to create up to 3-grams)"
             nargs = 1
             arg_type = Integer
-            default = Integer[3]
+            default = Integer[2]
         "FILES"
             help = "files or directories to cross compare, use 'X' to separate list A from list B"
             required = true
@@ -64,15 +64,51 @@ msg("baseline: ", baselinePath)
 msg("files X: ", fileX)
 msg("files Y: ", fileY)
 
-for fx in @task(fileProducer(fileX))
-  for fy in @task(fileProducer(fileY))
-    println("files ", fx, ",", fy)
+function cross(fn, fileX, fileY)
+  for fx in @task(fileProducer(fileX))
+    for fy in @task(fileProducer(fileY))
+      fn(fx, fy)
+    end
   end
 end
 
+function loadAndCompare(baseline, fx, fy)
+  xhandle = open(fx)
+  yhandle = open(fy)
+  # try
+    nx = Ngrams(Document(xhandle),2)
+    ny = Ngrams(Document(yhandle), 2)
+    compare(baseline, nx, ny)
+  # catch e
+    # println("Skipping ", fx, " X ", fy, " (Not an ASCII file?)")
+    # 0.0
+  # end
+end
+
+function compare(baseline, nx, ny)
+  total = 0
+  for (ngram, freqbase) in baseline
+    freqx = get(nx, ngram, 0)
+    freqy = get(ny, ngram, 0)
+    interscore = sqrt(freqx * freqy) / freqbase
+    total += interscore
+    # if interscore >= 1
+      # println(ngram, " ", freqbase, ":", freqx, ",", freqy, " : ", interscore)
+    # end
+  end
+  # println("total ", total)
+
+  sx = int(sum(values(nx))/2)
+  sy = int(sum(values(ny))/2)
+  (total / sqrt(sx^2 + sy^2), sx, sy)
+end
+
 baseline = Ngrams(open(baselinePath))
-
-
-# baseline = ngramsOfTextFile(settings["baseline"][1], settings["baseline"][1], settings["ngrams"][1])
-
-# println(baseline)
+cross(fileX, fileY) do fx, fy
+  score, sizex, sizey = loadAndCompare(baseline, fx, fy)
+  if length(fileX) == 1
+    println(score, "\t", sizey, "\t", score/(sizey), "\t", fy)
+  else
+    println(score, "\t", sizex, "\t", sizey, "\t", fy, "\t", fx)
+  end
+end

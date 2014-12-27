@@ -5,13 +5,13 @@ export Document, copy
 type Document
   content::MutableASCIIString
   title::String
-  function Document(c, t = None)
+  function Document(c::MutableASCIIString, t = None)
     clean!(c)
     new(c, t == None ? titleFromContent(c) : t)
   end
 end
 
-function Document(content::ASCIIString, title=None)
+function Document(content::String, title=None)
   Document(MutableASCIIString(content), title)
 end
 

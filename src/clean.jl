@@ -48,7 +48,7 @@ function clean!(text::MutableASCIIString)
       # most common case because words that are broken by syllables are dashed)
     elseif n == '.' && !just_added_period
       # Erase space before period
-      if (just_added_space)
+      if (just_added_space && j > 1)
         j -= 1
       end
       # Add a period to indicate sentence boundary
