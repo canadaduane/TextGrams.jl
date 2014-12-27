@@ -73,12 +73,13 @@ function cross(fn, fileX, fileY)
 end
 
 function loadAndCompare(baseline, fx, fy)
-  xhandle = open(fx)
-  yhandle = open(fy)
   # try
-    nx = Ngrams(Document(xhandle),2)
-    ny = Ngrams(Document(yhandle), 2)
-    compare(baseline, nx, ny)
+  msg("Loading $(fx)...")
+  nx = Ngrams(Document(open(fx)),2)
+  msg("Loading $(fy)...")
+  ny = Ngrams(Document(open(fy)), 2)
+  msg("Comparing...")
+  compare(baseline, nx, ny)
   # catch e
     # println("Skipping ", fx, " X ", fy, " (Not an ASCII file?)")
     # 0.0
@@ -112,6 +113,6 @@ cross(fileX, fileY) do fx, fy
   if length(fileX) == 1
     println(score, "\t", sizey, "\t", score/(sizey), "\t", fy)
   else
-    println(score, "\t", sizex, "\t", sizey, "\t", fy, "\t", fx)
+    println(score, "\t", sizey, "\t", sizex, "\t", fy, "\t", fx)
   end
 end
