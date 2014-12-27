@@ -6,11 +6,13 @@ export Ngrams, copy
 
 typealias Ngrams Dict{ASCIIString,Integer}
 
-function Ngrams(arr::Array{Any,2})
+function Ngrams(arr::Array{ASCIIString,2})
   d = Ngrams()
   for i in 1:size(arr, 1)
     try
-      d[convert(ASCIIString, arr[i,1])] = arr[i,2]
+      key = convert(ASCIIString, arr[i,1])
+      value = int(arr[i,2])
+      d[key] = value
     catch e
       println(STDERR, "'$(arr[i,1])' ($(typeof(arr[i,1]))) $(arr[i,2]) ($(typeof(arr[i,2])))")
       rethrow(e)
@@ -20,7 +22,7 @@ function Ngrams(arr::Array{Any,2})
 end
 
 function Ngrams(file::IOStream)
-  arr = readdlm(file, '\t')
+  arr = readdlm(file, '\t', ASCIIString)
   close(file)
   Ngrams(arr)
 end

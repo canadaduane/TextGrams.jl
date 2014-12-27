@@ -16,6 +16,6 @@ facts("Ngrams") do
 
   context("loads from tab-separated text file") do
     ngrams = Ngrams(open(fixture("samples/simple.2grams.txt")))
-    @fact ngrams => {"one world" => 1, "to reinvent" => 2}
+    @fact ngrams => {"one world" => 1, "to reinvent" => 2, "nan" => 1}
   end
 end
