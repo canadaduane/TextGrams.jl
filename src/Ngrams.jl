@@ -22,10 +22,15 @@ function Ngrams(arr::Array{ASCIIString,2})
 end
 
 function Ngrams(file::IOStream)
+  Ngrams(file, (n) -> ())
+end
+
+function Ngrams(file::IOStream, callback::Function)
   d = Ngrams()
-  for line in eachline(file)
-    k, v = split(chomp(line), '\t')
-    d[k] = int(v)
+  for line::ASCIIString in eachline(file)
+    tab = search(line, '\t')
+    d[line[1:(tab-1)]] = int(line[(tab+1):end-1])
+    callback(length(line))
   end
   d
 end

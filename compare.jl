@@ -1,5 +1,7 @@
 using ArgParse
 using TextGrams
+using ProgressMeter
+using AnsiColor
 
 global settings
 
@@ -74,11 +76,11 @@ end
 
 function loadAndCompare(baseline, fx, fy)
   # try
-  msg("Loading $(fx)...")
+  # msg("Loading $(fx)...")
   nx = Ngrams(Document(open(fx)),2)
-  msg("Loading $(fy)...")
+  # msg("Loading $(fy)...")
   ny = Ngrams(Document(open(fy)), 2)
-  msg("Comparing...")
+  # msg("Comparing...")
   compare(baseline, nx, ny)
   # catch e
     # println("Skipping ", fx, " X ", fy, " (Not an ASCII file?)")
@@ -104,10 +106,18 @@ function compare(baseline, nx, ny)
   (total / sqrt(sx^2 + sy^2), sx, sy)
 end
 
-msg("Loading baseline...")
-baseline = Ngrams(open(baselinePath))
+function linesInFile(filename)
+  wc = readall(`wc -l $(baselinePath)`)
+  linecount, _ = split(strip(wc), " ")
+  return int(linecount)
+end
 
-msg("Cross comparing...")
+msg("Measuring baseline size...")
+linecount = linesInFile(baselinePath)
+p = Progress(linecount, 1, yellow("Loading baseline... "), 50)
+baseline = @time Ngrams(open(baselinePath), (n) -> next!(p))
+
+msg("\nCross comparing...")
 cross(fileX, fileY) do fx, fy
   score, sizex, sizey = loadAndCompare(baseline, fx, fy)
   if length(fileX) == 1
