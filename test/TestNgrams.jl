@@ -18,4 +18,9 @@ facts("Ngrams") do
     ngrams = Ngrams(open(fixture("samples/simple.2grams.txt")))
     @fact ngrams => {"one world" => 1, "to reinvent" => 2, "nan" => 1}
   end
+
+  context("converts array of ASCIIString") do
+    ngrams = Ngrams(["hello" "1"; "bye" "2"; "ok" "3"])
+    @fact ngrams => {"hello" => 1, "bye" => 2, "ok" => 3}
+  end
 end

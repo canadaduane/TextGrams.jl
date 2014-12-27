@@ -22,9 +22,12 @@ function Ngrams(arr::Array{ASCIIString,2})
 end
 
 function Ngrams(file::IOStream)
-  arr = readdlm(file, '\t', ASCIIString)
-  close(file)
-  Ngrams(arr)
+  d = Ngrams()
+  for line in eachline(file)
+    k, v = split(chomp(line), '\t')
+    d[k] = int(v)
+  end
+  d
 end
 
 function Ngrams(d::Document, n::Integer = 1)
