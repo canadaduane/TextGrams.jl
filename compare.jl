@@ -60,9 +60,9 @@ if any(emptyLists)
   exit(-1)
 end
 
-msg("baseline: ", baselinePath)
-msg("files X: ", fileX)
-msg("files Y: ", fileY)
+msg("Using baseline: ", baselinePath)
+msg("Using files X: ", fileX)
+msg("Using files Y: ", fileY)
 
 function cross(fn, fileX, fileY)
   for fx in @task(fileProducer(fileX))
@@ -103,7 +103,10 @@ function compare(baseline, nx, ny)
   (total / sqrt(sx^2 + sy^2), sx, sy)
 end
 
+msg("Loading baseline...")
 baseline = Ngrams(open(baselinePath))
+
+msg("Cross comparing...")
 cross(fileX, fileY) do fx, fy
   score, sizex, sizey = loadAndCompare(baseline, fx, fy)
   if length(fileX) == 1
