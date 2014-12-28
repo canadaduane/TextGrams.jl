@@ -129,9 +129,5 @@ baseline = @time Ngrams(open(baselinePath), (n) -> next!(p))
 msg("\nCross comparing...")
 cross(fileX, fileY) do fx, fy
   score, sizex, sizey = loadAndCompare(baseline, fx, fy)
-  if length(fileX) == 1
-    println(score, "\t", sizey, "\t", score/(sizey), "\t", fy)
-  else
-    println(score, "\t", sizey, "\t", sizex, "\t", fy, "\t", fx)
-  end
+  println(score, "\t", sizex, "\t", sizey, "\t", fx, "\t", fy)
 end
