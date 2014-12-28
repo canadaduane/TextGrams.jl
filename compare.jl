@@ -90,19 +90,28 @@ end
 
 function compare(baseline, nx, ny)
   total = 0
-  for (ngram, freqbase) in baseline
-    freqx = get(nx, ngram, 0)
-    freqy = get(ny, ngram, 0)
-    interscore = sqrt(freqx * freqy) / freqbase
-    total += interscore
+  sx = int(sum(values(nx))/2)
+  sy = int(sum(values(ny))/2)
+
+  if sx < sy
+    for (ngram, freqx) in nx
+      freqy = get(ny, ngram, 0)
+      freqbase = get(baseline, ngram, 10000000)
+      interscore = sqrt(freqx * freqy) / freqbase
+      total += interscore
     # if interscore >= 1
       # println(ngram, " ", freqbase, ":", freqx, ",", freqy, " : ", interscore)
     # end
+    end
+  else
+    for (ngram, freqy) in ny
+      freqx = get(nx, ngram, 0)
+      freqbase = get(baseline, ngram, 10000000)
+      interscore = sqrt(freqx * freqy) / freqbase
+      total += interscore
+    end
   end
-  # println("total ", total)
 
-  sx = int(sum(values(nx))/2)
-  sy = int(sum(values(ny))/2)
   (total / sqrt(sx^2 + sy^2), sx, sy)
 end
 
