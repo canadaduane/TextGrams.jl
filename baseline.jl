@@ -49,18 +49,32 @@ function maybe_timed(fn::Function, m...)
   end
 end
 
-baseline = Ngrams()
+baseline =
+  if length(settings["precedent"]) == 1
+    msg("Using precedent ", settings["precedent"][1])
+    Ngrams(Document(open(settings["precedent"][1])), settings["ngrams"][1])
+  else
+    msg("No precedent")
+    Ngrams()
+  end
 
 for file in @task(fileProducer(settings["FILES"]))
   baselineSizeBefore = length(baseline)
-  msg(file)
+  msg("Loading ", file)
   ngrams = Ngrams(Document(open(file)), settings["ngrams"][1])
-  unionAdd!(baseline, ngrams)
+  if length(settings["precedent"]) == 1
+    msg("Intersecting")
+    intersectAdd!(baseline, ngrams)
+  else
+    msg("Unioning")
+    unionAdd!(baseline, ngrams)
+  end
 
   baselineSize = length(baseline)
   msg(baselineSizeBefore, " (+ ", (baselineSize - baselineSizeBefore), " of ", length(ngrams), ")")
 end
 
+msg("----- RESULTS -----")
 if !settings["ignore-results"]
   for (k,v) in baseline
     println(k, "\t", v)
