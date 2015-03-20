@@ -170,4 +170,8 @@ cross(fileX, fileY) do fx, fy
     @printf("%s\t%s\t%s\t%s\t%s\t%s\t%s\n", "total_inv", "total_mul", "total_sqrt", "sizex", "sizey", "namex", "namey")
   end
   @printf("%0.5f\t%0.5f\t%0.5f\t%d\t%d\t%s\t%s\n", total_inv, total_mul, total_sqr, sizex, sizey, nfx, nfy)
+  if settings["show-matches"]
+    println()
+    println()
+  end
 end
