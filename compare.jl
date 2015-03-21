@@ -73,16 +73,12 @@ msg("Using files X: ", fileX)
 msg("Using files Y: ", fileY)
 
 function cross(fn, fileX, fileY)
-  x = 1
   for fx in @task(fileProducer(fileX))
-    y = 1
     for fy in @task(fileProducer(fileY))
-      if x <= y && fx != fy
+      if fx != fy
         fn(fx, fy)
       end
-      y += 1
     end
-    x += 1
   end
 end
 
