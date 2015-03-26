@@ -82,12 +82,12 @@ function cross(fn, fileX, fileY)
   end
 end
 
-function loadAndCompare(baseline, fx, fy, show_matches_threshold=0.25)
+function loadAndCompare(baseline, fx, fy, n=2, show_matches_threshold=0.25)
   try
     msg("Loading $(fx)...")
-    nx = Ngrams(Document(open(fx)),2)
+    nx = Ngrams(Document(open(fx)), n)
     msg("Loading $(fy)...")
-    ny = Ngrams(Document(open(fy)), 2)
+    ny = Ngrams(Document(open(fy)), n)
     msg("Comparing... $(fx) x $(fy)")
     compare(baseline, nx, ny, 4, fx, fy, show_matches_threshold)
   catch e
@@ -161,7 +161,7 @@ if !settings["show-matches"]
 end
 cross(fileX, fileY) do fx, fy
   threshold = settings["show-matches"] ? settings["threshold"] : 1000000
-  total_inv, total_mul, total_sqr, sizex, sizey, nfx, nfy = loadAndCompare(baseline, fx, fy, threshold)
+  total_inv, total_mul, total_sqr, sizex, sizey, nfx, nfy = loadAndCompare(baseline, fx, fy, settings["ngrams"], threshold)
   if settings["show-matches"]
     @printf("%s\t%s\t%s\t%s\t%s\t%s\t%s\n", "total_inv", "total_mul", "total_sqrt", "sizex", "sizey", "namex", "namey")
   end
