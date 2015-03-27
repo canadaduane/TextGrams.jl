@@ -11,7 +11,7 @@ facts("Document") do
   end
 
   context("reads file") do
-    doc = Document(open("samples/liahona.txt"), "liahona")
+    doc = Document(open(fixture("samples/liahona.txt")), "liahona")
     @fact ismatch(r"^and it came to pass", doc.content) => true
   end
 end

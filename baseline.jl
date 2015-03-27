@@ -64,7 +64,7 @@ for file in @task(fileProducer(settings["FILES"]))
   ngrams = Ngrams(Document(open(file)), settings["ngrams"][1])
   if length(settings["precedent"]) == 1
     msg("Intersecting")
-    intersectAdd!(baseline, ngrams)
+    leftJoinAdd!(baseline, ngrams)
   else
     msg("Unioning")
     unionAdd!(baseline, ngrams)

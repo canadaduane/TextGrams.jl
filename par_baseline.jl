@@ -102,7 +102,7 @@ maybe_timed("Extracting $(first(settings["ngrams"]))-grams (map)...") do
     end
     local precedent_ngrams = fetch(ref_list[myid()])
     ngrams = Ngrams(file, first(settings["ngrams"]))
-    intersectAdd!(precedent_ngrams, ngrams)
+    leftJoinAdd!(precedent_ngrams, ngrams)
     if settings["verbose"]
       @printf("%45s Done: added %s ngrams\n", basename(file), length(ngrams))
     end

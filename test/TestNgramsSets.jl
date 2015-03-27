@@ -9,13 +9,13 @@ facts("NgramsSets") do
     @fact ngrams => {"test" => 1, "new" => 2}
   end
 
-  context("intersectAdd same keys") do
-    ngrams = intersectAdd(Ngrams({"test" => 1}), Ngrams({"test" => 2}))
-    @fact ngrams["test"] => 3
+  context("leftJoinAdd same keys") do
+    ngrams = leftJoinAdd(Ngrams({"test" => 1}), Ngrams({"test" => 2}))
+    @fact ngrams => {"test" => 3}
   end
 
-  context("intersectAdd new keys") do
-    ngrams = intersectAdd(Ngrams({"test" => 1}), Ngrams({"new" => 2}))
+  context("leftJoinAdd new keys") do
+    ngrams = leftJoinAdd(Ngrams({"test" => 1}), Ngrams({"new" => 2}))
     @fact ngrams => {"test" => 1}
   end
 
@@ -32,5 +32,23 @@ facts("NgramsSets") do
   context("delete keys") do
     ngrams = delete(Ngrams({"test" => 1}), Ngrams({"test" => 2}))
     @fact ngrams => Ngrams()
+  end
+
+  context("intersectAdd same keys") do
+    ngrams = intersectAdd(Ngrams({"test" => 1}), Ngrams({"test" => 2, "other" => 1}))
+    @fact ngrams => {"test" => 3}
+  end
+
+  context("intersectAdd disjunct keys") do
+    ngrams = intersectAdd(Ngrams({"test" => 1}), Ngrams({"new" => 2}))
+    @fact ngrams => Dict{ASCIIString,Integer}()
+  end
+
+  context("intersectAdd multiple Ngrams") do
+    ngrams = intersectAdd(
+      Ngrams({"a" => 1, "b" => 2, "c" => 3}),
+      Ngrams({"a" => 2, "b" => 3, "z" => 10}),
+      Ngrams({"a" => 3, "c" => 4, "y" => 12}))
+    @fact ngrams => {"a" => 6}
   end
 end

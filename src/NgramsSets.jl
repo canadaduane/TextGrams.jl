@@ -2,8 +2,9 @@ import Base.copy!
 
 export unionAdd!, unionAdd
 export unionSub!, unionSub
-export intersectAdd!, intersectAdd
+export leftJoinAdd!, leftJoinAdd
 export delete!, delete
+export intersectAdd
 
 # Add values to d from others
 function unionAdd!(d::Ngrams, others::Ngrams...)
@@ -43,7 +44,7 @@ function unionSub(d::Ngrams, others::Ngrams...)
 end
 
 # Add values to d from others only if keys from others are found in d
-function intersectAdd!(d::Ngrams, others::Ngrams...)
+function leftJoinAdd!(d::Ngrams, others::Ngrams...)
   for other in others
     for (k, v) in other
       if haskey(d, k)
@@ -54,8 +55,8 @@ function intersectAdd!(d::Ngrams, others::Ngrams...)
   return d
 end
 
-function intersectAdd(d::Ngrams, others::Ngrams...)
-  intersectAdd!(deepcopy(d), others...)
+function leftJoinAdd(d::Ngrams, others::Ngrams...)
+  leftJoinAdd!(deepcopy(d), others...)
 end
 
 # Remove keys from d that are found in others
@@ -70,4 +71,14 @@ end
 
 function delete(d::Ngrams, others::Ngrams...)
   delete!(deepcopy(d), others...)
+end
+
+# Intersect keys and add values
+function intersectAdd(ngrams::Ngrams...)
+  keySets = [Set(keys(n)) for n in ngrams]
+  d = Ngrams()
+  for k in intersect(keySets...)
+    d[k] = sum([n[k] for n in ngrams])
+  end
+  return d
 end
