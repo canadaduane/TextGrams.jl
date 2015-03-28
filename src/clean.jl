@@ -1,23 +1,23 @@
 using MutableStrings
 using Base.copy
-using Debug
 
 export clean!, clean
 
 #=
  Transforms text such as the following:
 
-   And behold, I said, "This is no good!"
-   What shall ye say unto these people, there-
+   And behold, I said--"This is no good!" What
+   shall ye say unto these people, there-
    fore?
 
- Into a cleaned up single line of text, like the following:
+ Into a set of sentences, one per line, like the following:
 
-   and behold i said this is no good.what shall ye say unto these people therefore.
+   and behold i said this is no good
+   what shall ye say unto these people therefore
 
  Spaces indicate word boundaries, while periods indicate sentence boundaries.
 =#
-@debug function clean!(text::MutableASCIIString, lineSep = '\n', wordSep = ' ')
+function clean!(text::MutableASCIIString, lineSep = '\n', wordSep = ' ')
   if length(text) == 0
     return text
   end
