@@ -1,4 +1,6 @@
 using MutableStrings
+using Base.copy
+using Debug
 
 export clean!, clean
 
@@ -15,66 +17,109 @@ export clean!, clean
 
  Spaces indicate word boundaries, while periods indicate sentence boundaries.
 =#
-function clean!(text::MutableASCIIString)
-  if length(text) == 1
+@debug function clean!(text::MutableASCIIString, lineSep = '\n', wordSep = ' ')
+  if length(text) == 0
     return text
   end
 
-  join_lines = false
-  just_added_period = false
-  just_added_space = true # prevent whitespace at beginning
-  j = 1
-  for i in 1:length(text)
+  justAddedLineSep = false
+  justAddedWordSep = true # prevent whitespace at beginning
+  maxScanAhead = 30
+  i, j = (1, 1)
+  textLen = length(text)
+
+  while i <= textLen
     c = text[i]
     n =
       if c >= 'A' && c <= 'Z'
         # Change upper case to lowercase
         c + 32
-      elseif c == '\n' || c == '\t' || c == ',' || c == ';' || c == '&' || c == '/'
-        # Change whitespace chars to spaces (i.e. all count as whitespace)
+      elseif c == '\t' || c == '_' || c == ',' || c == '&' || c == '/'
+        # Change inconsequential punctuation to spaces (i.e. all count as whitespace)
         ' '
-      elseif c == '?' || c == '!' || c == ':'
+      elseif c == '?' || c == '!' || c == ':' || c == ';'
         # Change exclamation, question marks to periods (i.e. sentence boundaries)
         '.'
       else
         c
       end
 
+    # hyphen at end of line joins word fragments
     if n == '-'
-      # A dash at the end of a line indicates we should join word parts
-      join_lines = true
-    elseif join_lines && n == ' '
-      # Ignore whitespace after a dash (i.e. including newlines, which is the
-      # most common case because words that are broken by syllables are dashed)
-    elseif n == '.' && !just_added_period
+      # double dash? (doesn't count as hyphen)
+      if i < textLen && text[i + 1] == '-'
+        if !justAddedWordSep && !justAddedLineSep
+          text[j] = wordSep
+          j += 1
+          i += 1
+          justAddedWordSep = true
+          justAddedLineSep = false
+        end
+      else
+        # # scan ahead to see if this hyphen is at the end of the line
+        k = i + 1
+        while k < i + maxScanAhead && k <= textLen
+          s = text[k]
+          if s != '\t' && s != ' '
+            if s == '\n'
+              # this is a hyphenated line join, so join the lines
+              i = k
+              break
+            else
+              # not a line join
+              break
+            end
+          end
+          k += 1
+        end
+      end
+    elseif n == '.' && !justAddedLineSep
+      # look-behind and see if this is an abbreviation
+      if (c == '.' && j >= 3)
+        a = text[j - 1]
+        if a >= 'a' && a <= 'z'
+          b = text[j - 2]
+
+          # we're just checking for single-letter abbrevs,
+          # so see if 2-chars-behind is whitespace
+          if b == ' ' || b == '.' || b == '\n' || b == '\t'
+            text[j] = '.'
+            j += 1
+
+            i += 1; continue
+          end
+        end
+      end
+
       # Erase space before period
-      if (just_added_space && j > 1)
+      if (justAddedWordSep && j > 1)
         j -= 1
       end
-      # Add a period to indicate sentence boundary
-      text[j] = '.'
+      # Add a sentence boundary (e.g. '\n')
+      text[j] = lineSep
       j += 1
-      just_added_period = true
-      just_added_space = false
-      join_lines = false
-    elseif n == ' ' && !just_added_space && !just_added_period
-      # Add a space to indicate word boundary
-      text[j] = ' '
+      justAddedLineSep = true
+      justAddedWordSep = false
+    elseif (n == ' ' || n == '\n') && 
+           !justAddedWordSep && 
+           !justAddedLineSep
+      # Add a word boundary (e.g. ' ')
+      text[j] = wordSep
       j += 1
-      just_added_space = true
-      just_added_period = false
-    elseif n >= 'a' && n <= 'z'
+      justAddedLineSep = false
+      justAddedWordSep = true
+    elseif n == '\'' || (n >= 'a' && n <= 'z')
       # Normal text
       text[j] = n
       j += 1
-      just_added_space = false
-      just_added_period = false
-      join_lines = false
+      justAddedLineSep = false
+      justAddedWordSep = false
     end
+    i += 1
   end
 
   # erase word or sentence boundary markers at end of text
-  if (just_added_space || just_added_period)
+  if (justAddedWordSep)
     j -= 1
   end
 
@@ -84,6 +129,7 @@ function clean!(text::MutableASCIIString)
   return text
 end
 
-function clean(text)
-  clean!(MutableASCIIString(copy(text)))
+function clean(text::String, lineSep = '\n', wordSep = ' ')
+  clean!(MutableASCIIString(copy(text)), lineSep, wordSep)
 end
+

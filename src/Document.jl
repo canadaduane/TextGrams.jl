@@ -1,6 +1,9 @@
 using MutableStrings
+using Base
 
 export Document, copy
+
+import Base.copy
 
 type Document
   content::MutableASCIIString
