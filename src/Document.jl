@@ -25,7 +25,7 @@ function Document(file::IOStream, title=None)
 end
 
 function titleFromContent(content)
-  short = length(content) > 35 ? content[1:35] : content
+  short = strip(length(content) > 35 ? content[1:35] : content)
   return replace(short, r"\s+", " ")
 end
 

@@ -1,7 +1,11 @@
 facts("Document") do
   context("is cleaned") do
     doc = Document("1--This, Document!!")
-    @fact doc.content => "this document"
+    @fact doc.content => "this document\n"
+  end
+
+  context("autosets title") do
+    doc = Document("1--This, Document!!")
     @fact doc.title => "this document"
   end
 
