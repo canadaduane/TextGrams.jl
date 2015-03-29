@@ -18,9 +18,8 @@ function parse_commandline()
             action = :store_true
         "--ngrams", "-n"
             help = "the N in ngrams (e.g. '3' to create up to 3-grams)"
-            nargs = 1
             arg_type = Integer
-            default = Integer[3]
+            default = 3
         "FILES"
             help = "files or directories to include in baseline"
             required = true
@@ -52,7 +51,7 @@ end
 baseline =
   if length(settings["precedent"]) == 1
     msg("Using precedent ", settings["precedent"][1])
-    Ngrams(Document(open(settings["precedent"][1])), settings["ngrams"][1])
+    Ngrams(Document(open(settings["precedent"][1])), settings["ngrams"])
   else
     msg("No precedent")
     Ngrams()
@@ -61,7 +60,7 @@ baseline =
 for file in @task(fileProducer(settings["FILES"]))
   baselineSizeBefore = length(baseline)
   msg("Loading ", file)
-  ngrams = Ngrams(Document(open(file)), settings["ngrams"][1])
+  ngrams = Ngrams(Document(open(file)), settings["ngrams"])
   if length(settings["precedent"]) == 1
     msg("Intersecting")
     leftJoinAdd!(baseline, ngrams)

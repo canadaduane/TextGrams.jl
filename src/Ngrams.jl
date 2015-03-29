@@ -57,9 +57,16 @@ function ngramizeNgrams(text::String, n::Integer)
     tail = head
     separators = 0
     while tail < length(text)
-      if text[tail] == ' ' || text[tail] == '.'
+      if text[tail] == '\n'
+        # End of line means sentence separator
+        incrementSubstring(d, text, head, tail-1)
+        if separators == 0
+          next_head = tail + 1
+        end
+        break
+      elseif text[tail] == ' ' || text[tail] == '.'
         separators += 1
-        incrementedSubstring(d, text, head, tail-1)
+        incrementSubstring(d, text, head, tail-1)
         if separators == 1
           next_head = tail + 1
         end
@@ -70,7 +77,7 @@ function ngramizeNgrams(text::String, n::Integer)
       tail += 1
     end
     if tail == length(text)
-      incrementedSubstring(d, text, head, tail)
+      incrementSubstring(d, text, head, tail)
       if separators == 0
         break
       end
@@ -81,7 +88,7 @@ function ngramizeNgrams(text::String, n::Integer)
   return d
 end
 
-function incrementedSubstring(dict, text, head, tail)
+function incrementSubstring(dict, text, head, tail)
   key = text[head:tail]
   counter = get!(dict, key, 0)
   dict[key] = counter + 1
