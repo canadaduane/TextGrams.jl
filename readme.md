@@ -44,3 +44,7 @@ intersectAdd(ng1, ng2)
 #   "works"       => 2
 
 ```
+
+## More Info
+
+See our blog, on [Using TextGrams.jl](http://blog.wordtree.org/2015/03/29/using-textgrams-jl/).
