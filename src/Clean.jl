@@ -34,10 +34,10 @@ function clean!(text::MutableASCIIString, lineSep = '\n', wordSep = ' ')
       if c >= 'A' && c <= 'Z'
         # Change upper case to lowercase
         c + 32
-      elseif c == '\t' || c == '_' || c == ',' || c == '&' || c == '/'
+      elseif c == '\t' || c == '_' || c == ',' || c == ':' || c == '&' || c == '/'
         # Change inconsequential punctuation to spaces (i.e. all count as whitespace)
         ' '
-      elseif c == '?' || c == '!' || c == ':' || c == ';'
+      elseif c == '?' || c == '!' || c == ';'
         # Change exclamation, question marks to periods (i.e. sentence boundaries)
         '.'
       else

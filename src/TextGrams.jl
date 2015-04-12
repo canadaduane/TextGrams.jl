@@ -1,11 +1,12 @@
 module TextGrams
 
-include("clean.jl")
+include("Clean.jl")
 include("FileUtils.jl")
 
 include("Document.jl")
 include("Ngrams.jl")
 include("NgramsSets.jl")
+include("LanguageModel.jl")
 
 export ngramsOfTextFile
 

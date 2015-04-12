@@ -64,7 +64,7 @@ function ngramizeNgrams(text::String, n::Integer)
           next_head = tail + 1
         end
         break
-      elseif text[tail] == ' ' || text[tail] == '.'
+      elseif text[tail] == ' '
         separators += 1
         incrementSubstring(d, text, head, tail-1)
         if separators == 1
